@@ -1,0 +1,231 @@
+===============================================================================
+Code Complexity & Clone Detection Tool
+===============================================================================
+
+An extensible CLI for measuring code complexity and detecting repeated code
+fragments. Designed to be language-agnostic with low-overhead.
+
+This document outlines:
+  - Goals and metrics
+  - Algorithms used
+  - Project structure
+  - Beyond-MVP roadmap
+  - Outputs
+  - Philosophy
+
+===============================================================================
+GOALS
+
+- Provide actionable complexity and duplication insights without heavy parsing.
+- Support any programming language
+- Keep runtime fast: linear or near-linear where possible.
+- Keep architecture modular so deeper analysis can be plugged in later.
+- Produce both human-readable and machine-readable reports.
+
+===============================================================================
+SCOPE
+
+The MVP focuses on high-signal, low-complexity algorithms that require only
+tokenization—not full AST parsing. This keeps the implementation small and
+the performance excellent.
+
+===============================================================================
+Algorithms
+-------------------------------------------------------------------------------
+1. Cyclomatic Complexity (McCabe)
+- Measures independent control-flow paths in a function.
+- Works by building a simple CFG (control-flow graph) from tokens or indentation.
+- Formula:
+      CC = E - N + 2P
+  where:
+      E = number of edges
+      N = number of nodes
+      P = number of connected components (usually 1)
+
+Purpose:
+- Flags overly complex functions.
+- Well understood by developers.
+-------------------------------------------------------------------------------
+2. Token-based Clone Detection (Rabin-Karp Rolling Hash)
+- Detects repeated token sequences across files.
+- Uses a rolling hash window (e.g., 20–50 tokens).
+- Language-agnostic; extremely fast.
+
+Purpose:
+- Quickly identifies copy/paste blocks and boilerplate.
+-------------------------------------------------------------------------------
+3. Lines of Code (LOC)
+- Counts executable or logical lines.
+- Required for future Maintainability Index calculations.
+
+Purpose:
+- Baseline size metric.
+-------------------------------------------------------------------------------
+4. Halstead Complexity Metrics
+- Based on counts of operators and operands.
+- Computes vocabulary, volume, difficulty, and effort.
+
+Purpose:
+- Complements Cyclomatic Complexity with lexical complexity.
+===============================================================================
+FUTURE
+-------------------------------------------------------------------------------
+A. AST-Based Clone Detection
+   - Compare abstract syntax trees or subtrees.
+   - Identifies clones resilient to renamed variables or formatting changes.
+   - Requires per-language AST adapters.
+
+B. Cognitive Complexity
+   - Scores human comprehension cost.
+   - Rewards flattened control flow, penalizes deep nesting.
+   - Requires AST-level traversal.
+
+C. Maintainability Index
+   - Combines Cyclomatic, Halstead, and LOC into a single number.
+   - Good for dashboards and longitudinal tracking.
+
+D. Semantic Clone Detection
+   - Goes beyond syntax: identifies logically equivalent code.
+   - Requires control/data-flow analysis.
+
+E. Dependency Metrics
+   - Coupling, fan-in/fan-out, depth of inheritance.
+   - Requires language-specific type-resolution or symbol graph extraction.
+
+F. Hotspot Analysis
+   - Combine Git history + complexity metrics.
+   - Identify files that change often AND are complex.
+
+G. Incremental Mode
+   - Cache hashes/graphs.
+   - Analyze only changed files and touched boundaries.
+
+H. Rich Reports
+   - HTML dashboards
+   - SVG graphs (CFG visualization)
+   - JSON with stable schema for CI systems
+
+===============================================================================
+CRATES
+
+--------------------------------------------------------------------------------
+core
+  tokenizer
+    - minimal language-agnostic tokenizer
+    - operator/operand extractor (Halstead)
+    - whitespace, comments, string handling
+  complexity
+    cyclomatic
+      - CFG builder
+      - node/edge counter
+    halstead
+      - operator+operand tables
+    loc
+      - physical and logical LOC
+  cloner
+    - rolling hash (Rabin-Karp)
+    - w-shingling and fingerprint index
+    - min token length filter
+  reporter
+    - JSON output
+    - plaintext/ANSI output
+    - sorting, filtering, severity thresholds
+  loader
+    - config loading
+    - file walker + globbing
+    - ignore rules
+
+--------------------------------------------------------------------------------
+cli
+  - commands: analyze, clones, complexity, dump-config
+  - flags: --json, --threshold, --min-tokens, --sort, --path
+
+===============================================================================
+OUTPUT FORMATS
+--------------------------------------------------------------------------------
+Plaintext:
+
+FILE: src/server/routes.rs
+    Cyclomatic: 14   (warning)
+    Halstead Volume: 312.9
+    LOC: 128
+
+FILE: src/server/auth.rs
+    Cyclomatic: 5
+    Halstead Volume: 102.3
+    LOC: 41
+
+CLONES:
+  - HashMatch #7
+    - src/server/routes.rs:41-78
+    - src/server/router.rs:12-49
+    Length: 32 tokens
+
+--------------------------------------------------------------------------------
+JSON:
+
+{
+  "files": [
+    {
+      "path": "src/server/routes.rs",
+      "cyclomatic": 14,
+      "halstead": { "volume": 312.9, "difficulty": 12.8 },
+      "loc": 128
+    }
+  ],
+  "clones": [
+    {
+      "id": 7,
+      "length": 32,
+      "locations": [
+        { "file": "src/server/routes.rs", "start": 41, "end": 78 },
+        { "file": "src/server/router.rs", "start": 12, "end": 49 }
+      ]
+    }
+  ]
+}
+
+===============================================================================
+DESIGN PRINCIPLES
+
+1. Zero language assumptions in the MVP.
+2. Pluggable architecture (token → AST → CFG → semantic).
+3. High performance by default.
+4. No global state; everything streamed and incremental.
+5. Developer-friendly reporting and clear severity levels.
+6. Configurable thresholds
+
+===============================================================================
+SUMMARY
+
+MVP:
+  - LOC
+  - Cyclomatic Complexity
+  - Rabin-Karp Clone Detection
+  - Halstead Complexity
+
+Beyond MVP:
+  - AST-based clones
+  - Cognitive Complexity
+  - Maintainability Index
+  - Coupling metrics
+  - Call graphs and data-flow graphs
+  - Hotspot analysis
+  - Incremental scanning
+
+===============================================================================
+REFERENCES
+Cyclomatic Complexity (McCabe, 1976):
+  https://www.literateprogramming.com/mccabe.pdf
+  https://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication500-235.pdf
+
+AST clone detection:
+  https://www.cs.ucdavis.edu/~su/publications/icse07.pdf
+
+LSH-based clone detection:
+  https://journals.riverpublishers.com/index.php/JCSANDM/article/download/18799/18101/68821
+  https://www.sei.cmu.edu/library/code-similarity-detection-using-syntax-agnostic-locality-sensitive-hashing/
+
+Halstead:
+  https://www.researchgate.net/publication/317317114_Software_Complexity_Analysis_Using_Halstead_Metrics
+  https://nvlpubs.nist.gov/nistpubs/TechnicalNotes/NIST.TN.1990.pdf

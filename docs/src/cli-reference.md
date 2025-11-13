@@ -98,7 +98,7 @@ mccabre clones src/ --json | jq '.clones | length'
 
 ### `dump-config`
 
-Display current configuration.
+Display and optionally save current configuration.
 
 ```bash
 mccabre dump-config [OPTIONS]
@@ -107,6 +107,7 @@ mccabre dump-config [OPTIONS]
 **Options:**
 
 - `-c, --config <FILE>` - Path to config file (shows default if not specified)
+- `-o, --output <PATH>` - Save configuration to file or directory
 
 **Examples:**
 
@@ -116,6 +117,15 @@ mccabre dump-config
 
 # Show loaded configuration
 mccabre dump-config --config mccabre.toml
+
+# Save default config to file
+mccabre dump-config -o my-config.toml
+
+# Save config to directory (creates mccabre.toml)
+mccabre dump-config -o ./configs/
+
+# Load and save to new location
+mccabre dump-config -c old-config.toml -o new-config.toml
 ```
 
 ## Global Options

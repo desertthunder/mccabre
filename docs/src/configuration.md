@@ -27,6 +27,30 @@ min_tokens = 30
 respect_gitignore = true
 ```
 
+### Generating a Config File
+
+You can generate a config file using the `dump-config` command:
+
+```bash
+# Save default config to current directory
+mccabre dump-config -o mccabre.toml
+
+# Save to a specific location
+mccabre dump-config -o /path/to/config.toml
+
+# Save to a directory (creates mccabre.toml in that directory)
+mccabre dump-config -o ./configs/
+
+# Load existing config and save to new location
+mccabre dump-config -c old-config.toml -o new-config.toml
+```
+
+This is useful for:
+
+- Creating a starting point for customization
+- Copying configurations between projects
+- Version controlling your settings
+
 ## Configuration Options
 
 ### Complexity Settings

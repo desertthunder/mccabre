@@ -248,6 +248,22 @@ mccabre analyze src/ --json | \
 mccabre analyze src/ --json | jq '.summary'
 ```
 
+### Generate and Save Configuration
+
+Create a config file for your project:
+
+```bash
+# Save default config to current directory
+mccabre dump-config -o mccabre.toml
+
+# Generate config for a specific project structure
+cd my-project/
+mccabre dump-config -o .
+
+# Copy config from one project to another
+mccabre dump-config -c ../project-a/mccabre.toml -o ./mccabre.toml
+```
+
 ## Tips and Tricks
 
 ### Incremental Analysis

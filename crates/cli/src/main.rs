@@ -93,6 +93,10 @@ enum Commands {
         /// Path to config file (if not specified, shows defaults)
         #[arg(short, long)]
         config: Option<PathBuf>,
+
+        /// Save configuration to file (file path or directory)
+        #[arg(short = 'o', long)]
+        output: Option<PathBuf>,
     },
 }
 
@@ -112,6 +116,6 @@ fn main() -> Result<()> {
             commands::clones::run(path, json, Some(min_tokens), config, !no_gitignore)
         }
 
-        Commands::DumpConfig { config } => commands::dump_config::run(config),
+        Commands::DumpConfig { config, output } => commands::dump_config::run(config, output),
     }
 }

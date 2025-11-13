@@ -95,7 +95,7 @@ fn print_clones_report(report: &Report, files: &[SourceFile], highlight: bool) {
 
                         println!("{}", "    ┌─────".dimmed());
                         for line in highlighted.lines() {
-                            println!("    │ {}", line);
+                            println!("    │ {line}");
                         }
                         println!("{}", "    └─────".dimmed());
                     }

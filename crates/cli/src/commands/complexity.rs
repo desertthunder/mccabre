@@ -79,7 +79,7 @@ fn print_complexity_report(report: &Report, config: &Config) {
         println!("{} {}", "FILE:".blue().bold(), file.path.display().bold());
 
         let complexity_value = file.cyclomatic.file_complexity;
-        let complexity_text = format!("Cyclomatic Complexity:   {}", complexity_value);
+        let complexity_text = format!("Cyclomatic Complexity:   {complexity_value}");
 
         if complexity_value > config.complexity.error_threshold {
             println!("    {}", complexity_text.red().bold());
@@ -106,7 +106,7 @@ fn print_complexity_report(report: &Report, config: &Config) {
                 } else if func.complexity > config.complexity.warning_threshold {
                     println!("{}", func_text.yellow());
                 } else {
-                    println!("{}", func_text);
+                    println!("{func_text}");
                 }
             }
             println!();

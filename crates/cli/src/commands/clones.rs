@@ -1,10 +1,19 @@
 use anyhow::Result;
-use mccabre_core::{cloner::CloneDetector, config::Config, loader::FileLoader, reporter::Report};
+use mccabre_core::{
+    cloner::CloneDetector,
+    config::Config,
+    loader::{FileLoader, SourceFile},
+    reporter::Report,
+};
 use owo_colors::OwoColorize;
+use std::collections::HashMap;
 use std::path::PathBuf;
+
+use crate::highlight::Highlighter;
 
 pub fn run(
     path: PathBuf, json: bool, min_tokens: Option<usize>, config_path: Option<PathBuf>, respect_gitignore: bool,
+    highlight: bool,
 ) -> Result<()> {
     let config = if let Some(config_path) = config_path {
         Config::from_file(config_path)?
@@ -33,13 +42,13 @@ pub fn run(
     if json {
         println!("{}", report.to_json()?);
     } else {
-        print_clones_report(&report);
+        print_clones_report(&report, &files, highlight);
     }
 
     Ok(())
 }
 
-fn print_clones_report(report: &Report) {
+fn print_clones_report(report: &Report, files: &[SourceFile], highlight: bool) {
     println!("{}", "=".repeat(80).cyan());
     println!("{}", "CLONE DETECTION REPORT".cyan().bold());
     println!("{}\n", "=".repeat(80).cyan());
@@ -54,6 +63,9 @@ fn print_clones_report(report: &Report) {
             "clone groups".green().bold()
         );
         println!();
+
+        let file_map: HashMap<_, _> = files.iter().map(|f| (&f.path, f)).collect();
+        let highlighter = if highlight { Some(Highlighter::new()) } else { None };
 
         for clone in &report.clones {
             println!(
@@ -73,10 +85,39 @@ fn print_clones_report(report: &Report) {
                     loc.file.display(),
                     format!("{}-{}", loc.start_line, loc.end_line).dimmed()
                 );
+
+                if highlight && let Some(source_file) = file_map.get(&loc.file) {
+                    let code_block = extract_lines(&source_file.content, loc.start_line, loc.end_line);
+
+                    if let Some(ref hl) = highlighter {
+                        let ext = source_file.path.extension().and_then(|e| e.to_str()).unwrap_or("txt");
+                        let highlighted = hl.highlight(&code_block, ext);
+
+                        println!("{}", "    ┌─────".dimmed());
+                        for line in highlighted.lines() {
+                            println!("    │ {}", line);
+                        }
+                        println!("{}", "    └─────".dimmed());
+                    }
+                }
             }
             println!();
         }
     }
 
     println!("{}", "=".repeat(80).cyan());
+}
+
+/// Extract lines from source code by line numbers (1-indexed)
+fn extract_lines(source: &str, start_line: usize, end_line: usize) -> String {
+    source
+        .lines()
+        .enumerate()
+        .filter(|(idx, _)| {
+            let line_num = idx + 1;
+            line_num >= start_line && line_num <= end_line
+        })
+        .map(|(_, line)| line)
+        .collect::<Vec<_>>()
+        .join("\n")
 }

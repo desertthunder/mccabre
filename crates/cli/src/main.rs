@@ -1,4 +1,5 @@
 mod commands;
+mod highlight;
 
 use anyhow::Result;
 use clap::{Parser, Subcommand};
@@ -40,6 +41,10 @@ enum Commands {
         /// Disable gitignore awareness
         #[arg(long)]
         no_gitignore: bool,
+
+        /// Disable syntax highlighting for clone code blocks
+        #[arg(long)]
+        no_highlight: bool,
     },
 
     /// Analyze cyclomatic complexity and LOC only
@@ -86,6 +91,10 @@ enum Commands {
         /// Disable gitignore awareness
         #[arg(long)]
         no_gitignore: bool,
+
+        /// Disable syntax highlighting for clone code blocks
+        #[arg(long)]
+        no_highlight: bool,
     },
 
     /// Display current configuration
@@ -104,17 +113,40 @@ fn main() -> Result<()> {
     let cli = Cli::parse();
 
     match cli.command {
-        Commands::Analyze { path, json, threshold, min_tokens, config, no_gitignore } => {
-            commands::analyze::run(path, json, threshold, Some(min_tokens), config, !no_gitignore)
-        }
+        Commands::Analyze {
+            path,
+            json,
+            threshold,
+            min_tokens,
+            config,
+            no_gitignore,
+            no_highlight,
+        } => commands::analyze::run(
+            path,
+            json,
+            threshold,
+            Some(min_tokens),
+            config,
+            !no_gitignore,
+            !no_highlight,
+        ),
 
-        Commands::Complexity { path, json, threshold, config, no_gitignore } => {
-            commands::complexity::run(path, json, threshold, config, !no_gitignore)
-        }
+        Commands::Complexity {
+            path,
+            json,
+            threshold,
+            config,
+            no_gitignore,
+        } => commands::complexity::run(path, json, threshold, config, !no_gitignore),
 
-        Commands::Clones { path, json, min_tokens, config, no_gitignore } => {
-            commands::clones::run(path, json, Some(min_tokens), config, !no_gitignore)
-        }
+        Commands::Clones {
+            path,
+            json,
+            min_tokens,
+            config,
+            no_gitignore,
+            no_highlight,
+        } => commands::clones::run(path, json, Some(min_tokens), config, !no_gitignore, !no_highlight),
 
         Commands::DumpConfig { config, output } => commands::dump_config::run(config, output),
     }

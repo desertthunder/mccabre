@@ -21,6 +21,7 @@ mccabre analyze [OPTIONS] [PATH]
 - `--min-tokens <N>` - Minimum tokens for clone detection (default: 30)
 - `-c, --config <FILE>` - Path to config file
 - `--no-gitignore` - Disable gitignore awareness
+- `--no-highlight` - Disable syntax highlighting for code blocks
 
 **Examples:**
 
@@ -82,6 +83,7 @@ mccabre clones [OPTIONS] [PATH]
 - `--min-tokens <N>` - Minimum tokens for detection (default: 30)
 - `-c, --config <FILE>` - Path to config file
 - `--no-gitignore` - Disable gitignore awareness
+- `--no-highlight` - Disable syntax highlighting for code blocks
 
 **Examples:**
 

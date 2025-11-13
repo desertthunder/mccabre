@@ -266,6 +266,18 @@ mccabre dump-config -c ../project-a/mccabre.toml -o ./mccabre.toml
 
 ## Tips and Tricks
 
+### Syntax Highlighting
+
+By default, code blocks in `analyze` and `clones` output are syntax highlighted. To disable:
+
+```bash
+# Disable syntax highlighting for cleaner output
+mccabre analyze src/ --no-highlight
+
+# Useful for piping to files or when colors aren't supported
+mccabre clones src/ --no-highlight > report.txt
+```
+
 ### Incremental Analysis
 
 Analyze only changed files:

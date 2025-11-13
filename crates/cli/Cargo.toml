@@ -9,3 +9,4 @@ owo-colors = "4.2.3"
 anyhow = "1.0"
 serde_json = "1.0"
 mccabre-core = { path = "../core" }
+syntect = "5.2"

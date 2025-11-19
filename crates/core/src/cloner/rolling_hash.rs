@@ -140,7 +140,7 @@ mod tests {
     #[test]
     fn test_rolling_preserves_pattern() {
         let mut rh = RollingHash::new(3);
-        let values = vec![1, 2, 3, 4, 5, 6, 1, 2, 3];
+        let values = [1, 2, 3, 4, 5, 6, 1, 2, 3];
 
         rh.init(&values[0..3]);
         let first_hash = rh.get();

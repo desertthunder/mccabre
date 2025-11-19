@@ -55,11 +55,16 @@ Purpose:
 - Quickly identifies copy/paste blocks and boilerplate.
 -------------------------------------------------------------------------------
 3. Lines of Code (LOC)
-- Counts executable or logical lines.
+- Counts physical, logical, comment, and blank lines.
+- Token-based classification for accuracy.
+- Supports ranking by any metric (logical, physical, comments, blank).
+- Can aggregate and rank by directory.
 - Required for future Maintainability Index calculations.
 
 Purpose:
 - Baseline size metric.
+- Identify largest files and directories.
+- Track codebase growth and comment density.
 -------------------------------------------------------------------------------
 4. Halstead Complexity Metrics
 - Based on counts of operators and operands.
@@ -137,8 +142,13 @@ core
 
 --------------------------------------------------------------------------------
 cli
-  - commands: analyze, clones, complexity, dump-config
-  - flags: --json, --threshold, --min-tokens, --sort, --path
+  - commands: analyze, clones, complexity, loc, dump-config
+  - analyze: full analysis (complexity + clones + LOC)
+  - clones: detect code clones only
+  - complexity: analyze cyclomatic complexity and LOC
+  - loc: focused LOC analysis with ranking (by file or directory)
+  - dump-config: display or save current configuration
+  - flags: --json, --threshold, --min-tokens, --rank-by, --rank-dirs, --path
 
 ===============================================================================
 OUTPUT FORMATS

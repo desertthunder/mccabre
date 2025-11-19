@@ -71,31 +71,97 @@ Compare logical vs physical LOC:
 
 ## Using LOC with Mccabre
 
-### Basic Usage
+### Commands
+
+Mccabre provides multiple ways to analyze LOC:
 
 ```bash
-# Analyze LOC for a directory
+# Dedicated LOC analysis with ranking
+mccabre loc src/
+
+# Full analysis including complexity and clones
 mccabre analyze src/
 
-# Complexity command also includes LOC
+# Complexity analysis includes LOC
 mccabre complexity src/
+```
+
+### The `loc` Command
+
+The `loc` command provides focused LOC analysis with powerful ranking capabilities.
+
+#### Basic Usage
+
+```bash
+# Rank files by logical LOC (default)
+mccabre loc src/
+
+# Rank files by physical LOC
+mccabre loc src/ --rank-by physical
+
+# Rank files by comments
+mccabre loc src/ --rank-by comments
+
+# Rank files by blank lines
+mccabre loc src/ --rank-by blank
+```
+
+#### Directory Ranking
+
+Group and rank files by directory:
+
+```bash
+# Rank directories by total LOC, files ranked within each
+mccabre loc src/ --rank-dirs
+
+# Rank directories by comments
+mccabre loc src/ --rank-dirs --rank-by comments
 ```
 
 ### Sample Output
 
+#### File Ranking
+
 ```text
-FILE: src/main.rs
-    Cyclomatic Complexity:   5
-    Physical LOC:            120
-    Logical LOC:             85
-    Comment lines:           25
-    Blank lines:             10
+LINES OF CODE ANALYSIS
+
+SUMMARY
+Total files analyzed:        12
+Total physical LOC:          2246
+Total logical LOC:           1360
+Total comment lines:         135
+Total blank lines:           751
+
+FILES RANKED BY Logical LOC
+
+1. crates/core/src/complexity/loc.rs (Logical LOC: 297)
+   Physical: 403 | Logical: 297 | Comments: 37 | Blank: 69
+
+2. crates/core/src/reporter.rs (Logical LOC: 212)
+   Physical: 260 | Logical: 212 | Comments: 16 | Blank: 32
 ```
 
-### JSON
+#### Directory Ranking
+
+```text
+DIRECTORIES RANKED BY Logical LOC
+
+DIRECTORY: crates/core/src
+  Total Physical:  1126 | Logical:  583 | Comments: 42 | Blank: 501
+
+  Files:
+    reporter.rs (Logical LOC: 212) - P: 260 | L: 212 | C: 16 | B: 32
+    loader.rs (Logical LOC: 150) - P: 204 | L: 150 | C: 8 | B: 46
+```
+
+### JSON Output
 
 ```bash
-mccabre analyze src/ --json
+# File ranking as JSON
+mccabre loc src/ --json
+
+# Directory ranking as JSON
+mccabre loc src/ --rank-dirs --json
 ```
 
 ```json
@@ -103,14 +169,22 @@ mccabre analyze src/ --json
   "files": [
     {
       "path": "src/main.rs",
-      "loc": {
+      "metrics": {
         "physical": 120,
         "logical": 85,
         "comments": 25,
         "blank": 10
       }
     }
-  ]
+  ],
+  "directories": null,
+  "summary": {
+    "total_files": 1,
+    "total_physical": 120,
+    "total_logical": 85,
+    "total_comments": 25,
+    "total_blank": 10
+  }
 }
 ```
 
@@ -158,33 +232,51 @@ LOC counts everything, including:
 
 Use `.gitignore` to exclude these (Mccabre respects gitignore).
 
-## Tracking LOC Over Time
+## Advanced Use Cases
 
-### Baseline
+### Finding the Largest Files
+
+```bash
+# Top 10 largest files by logical LOC
+mccabre loc src/ --rank-by logical | head -30
+```
+
+### Identifying Under-Commented Code
+
+```bash
+# Files ranked by comment count (ascending)
+mccabre loc src/ --rank-by comments
+```
+
+### Directory Hotspots
+
+```bash
+# Find directories with the most code
+mccabre loc . --rank-dirs --rank-by logical
+```
+
+### Tracking LOC Over Time
 
 ```bash
 # Create baseline
-mccabre analyze src/ --json > baseline.json
-```
+mccabre loc src/ --json > baseline.json
 
-### Compare
-
-```bash
 # Later...
-mccabre analyze src/ --json > current.json
+mccabre loc src/ --json > current.json
 
-# Compare (using jq)
-jq '.summary.total_logical_loc' baseline.json
-jq '.summary.total_logical_loc' current.json
+# Compare using jq
+jq '.summary.total_logical' baseline.json
+jq '.summary.total_logical' current.json
 ```
 
-### Visualize Growth
+### CI Integration
 
 Integrate with your CI to track:
 
 - LOC growth per sprint
 - LOC per feature
 - Comment ratio trends
+- Detect large file additions
 
 ## See Also
 

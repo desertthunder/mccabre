@@ -1,8 +1,7 @@
 use crate::coverage::{CoverageReport, FileCoverage};
 use owo_colors::OwoColorize;
 
-#[cfg(test)]
-fn strip_ansi_codes(s: &str) -> String {
+pub fn strip_ansi_codes(s: &str) -> String {
     let mut result = String::new();
     let mut chars = s.chars().peekable();
 

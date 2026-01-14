@@ -1,8 +1,8 @@
 mod commands;
-mod highlight;
 
 use anyhow::Result;
 use clap::{Parser, Subcommand};
+use mccabre_core::complexity::loc::RankBy;
 use std::path::PathBuf;
 
 #[derive(Parser)]
@@ -137,6 +137,15 @@ enum Commands {
 
     /// Analyze code coverage from LCOV data
     Coverage {
+        #[command(subcommand)]
+        subcommand: CoverageSubcommand,
+    },
+}
+
+#[derive(Subcommand)]
+enum CoverageSubcommand {
+    /// Show summary of coverage report
+    Report {
         /// Path to LCOV file
         #[arg(long, value_name = "PATH")]
         from: PathBuf,
@@ -148,10 +157,25 @@ enum Commands {
         /// Repository root for path normalization
         #[arg(long, value_name = "PATH")]
         repo_root: Option<PathBuf>,
+    },
 
-        /// View detailed coverage for a specific file
+    /// Show detailed coverage for a file or directory
+    Show {
+        /// Path to LCOV file
         #[arg(long, value_name = "PATH")]
-        file: Option<PathBuf>,
+        from: PathBuf,
+
+        /// Repository root for path normalization
+        #[arg(long, value_name = "PATH")]
+        repo_root: Option<PathBuf>,
+
+        /// Path to file or directory to show (optional, defaults to all files)
+        #[arg(value_name = "PATH")]
+        path: Option<PathBuf>,
+
+        /// Minimum consecutive ignored lines before truncation (default: 5)
+        #[arg(long)]
+        truncate_threshold: Option<usize>,
     },
 }
 
@@ -178,8 +202,6 @@ fn main() -> Result<()> {
         }
         Commands::DumpConfig { config, output } => commands::dump_config::run(config, output),
         Commands::Loc { path, json, rank_by, rank_dirs, config, no_gitignore } => {
-            use mccabre_core::complexity::loc::RankBy;
-
             let rank_by = match rank_by.to_lowercase().as_str() {
                 "logical" => RankBy::Logical,
                 "physical" => RankBy::Physical,
@@ -193,12 +215,11 @@ fn main() -> Result<()> {
 
             commands::loc::run(path, json, rank_by, rank_dirs, config, !no_gitignore)
         }
-        Commands::Coverage { from, jsonl, repo_root, file } => {
-            if let Some(file) = file {
-                commands::coverage::run_file_view(file, from)
-            } else {
-                commands::coverage::run(from, jsonl, repo_root)
+        Commands::Coverage { subcommand } => match subcommand {
+            CoverageSubcommand::Report { from, jsonl, repo_root } => commands::coverage::run(from, jsonl, repo_root),
+            CoverageSubcommand::Show { from, repo_root, path, truncate_threshold } => {
+                commands::coverage::run_show(from, repo_root, path, truncate_threshold)
             }
-        }
+        },
     }
 }

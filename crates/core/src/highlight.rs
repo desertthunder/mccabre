@@ -14,7 +14,6 @@ impl Highlighter {
         Self { syntax_set: SyntaxSet::load_defaults_newlines(), theme_set: ThemeSet::load_defaults() }
     }
 
-    /// Highlight code with syntax highlighting
     pub fn highlight(&self, code: &str, file_extension: &str) -> String {
         let syntax = self
             .syntax_set
@@ -44,7 +43,6 @@ impl Default for Highlighter {
     }
 }
 
-/// Convert syntect Style to owo-colors styled text
 fn style_to_owo(style: &Style, text: &str) -> String {
     let fg = style.foreground;
 

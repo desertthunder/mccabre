@@ -1,5 +1,6 @@
 use anyhow::Result;
 use mccabre_core::{
+    Highlighter,
     cloner::CloneDetector,
     complexity::{CyclomaticMetrics, LocMetrics},
     config::Config,
@@ -9,8 +10,6 @@ use mccabre_core::{
 use owo_colors::OwoColorize;
 use std::collections::HashMap;
 use std::path::PathBuf;
-
-use crate::highlight::Highlighter;
 
 pub fn run(
     path: PathBuf, json: bool, threshold: Option<usize>, min_tokens: Option<usize>, config_path: Option<PathBuf>,

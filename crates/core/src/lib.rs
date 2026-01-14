@@ -3,8 +3,10 @@ pub mod complexity;
 pub mod config;
 pub mod coverage;
 pub mod error;
+pub mod highlight;
 pub mod loader;
 pub mod reporter;
 pub mod tokenizer;
 
 pub use error::{MccabreError, Result};
+pub use highlight::Highlighter;

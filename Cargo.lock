@@ -383,6 +383,7 @@ dependencies = [
  "owo-colors",
  "serde",
  "serde_json",
+ "syntect",
  "tempfile",
  "thiserror 2.0.17",
  "toml",

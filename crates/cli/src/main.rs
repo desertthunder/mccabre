@@ -134,6 +134,25 @@ enum Commands {
         #[arg(long)]
         no_gitignore: bool,
     },
+
+    /// Analyze code coverage from LCOV data
+    Coverage {
+        /// Path to LCOV file
+        #[arg(long, value_name = "PATH")]
+        from: PathBuf,
+
+        /// Output as JSONL to file
+        #[arg(long, value_name = "PATH")]
+        jsonl: Option<PathBuf>,
+
+        /// Repository root for path normalization
+        #[arg(long, value_name = "PATH")]
+        repo_root: Option<PathBuf>,
+
+        /// View detailed coverage for a specific file
+        #[arg(long, value_name = "PATH")]
+        file: Option<PathBuf>,
+    },
 }
 
 fn main() -> Result<()> {
@@ -173,6 +192,13 @@ fn main() -> Result<()> {
             };
 
             commands::loc::run(path, json, rank_by, rank_dirs, config, !no_gitignore)
+        }
+        Commands::Coverage { from, jsonl, repo_root, file } => {
+            if let Some(file) = file {
+                commands::coverage::run_file_view(file, from)
+            } else {
+                commands::coverage::run(from, jsonl, repo_root)
+            }
         }
     }
 }

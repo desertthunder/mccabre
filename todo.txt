@@ -1,0 +1,61 @@
+================================================================================
+todo.txt
+================================================================================
+A. Test Coverage Ingestion
+   - Ingest LCOV/JSON from `cargo llvm-cov` or `cargo test -- --coverage`.
+   - Render to terminal, HTML, Markdown, JSONL.
+   - Support path normalization (`--root`, `--strip-prefix`, `--ignore-regex`).
+   - Support Git diff coverage
+
+B. AST-Based Clone Detection
+   - Compare abstract syntax trees or subtrees.
+   - Identifies clones resilient to renamed variables or formatting changes.
+   - Requires per-language AST adapters.
+
+C. Cognitive Complexity
+   - Scores human comprehension cost.
+   - Rewards flattened control flow, penalizes deep nesting.
+   - Requires AST-level traversal.
+
+D. Maintainability Index
+   - Combines Cyclomatic, Halstead, and LOC into a single number.
+   - Good for dashboards and longitudinal tracking.
+
+E. Semantic Clone Detection
+   - Goes beyond syntax: identifies logically equivalent code.
+   - Requires control/data-flow analysis.
+
+F. Dependency Metrics
+   - Coupling, fan-in/fan-out, depth of inheritance.
+   - Requires language-specific type-resolution or symbol graph extraction.
+
+G. Hotspot Analysis
+   - Combine Git history + complexity metrics.
+   - Identify files that change often AND are complex.
+
+H. Incremental Mode
+   - Cache hashes/graphs.
+   - Analyze only changed files and touched boundaries.
+
+I. Rich Reports
+   - HTML dashboards
+   - SVG graphs (CFG visualization)
+   - JSON with stable schema for CI systems
+
+-------------------------------------------------------------------------------
+SUMMARY
+
+MVP:
+  - LOC
+  - Cyclomatic Complexity
+  - Rabin-Karp Clone Detection
+  - Halstead Complexity
+
+Beyond MVP:
+  - AST-based clones
+  - Cognitive Complexity
+  - Maintainability Index
+  - Coupling metrics
+  - Call graphs and data-flow graphs
+  - Hotspot analysis
+  - Incremental scanning
